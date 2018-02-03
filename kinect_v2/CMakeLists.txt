@@ -10,8 +10,8 @@ FIND_PACKAGE(catkin REQUIRED COMPONENTS
 )
 
 # Important: change the following 2 paths according to the installation
-SET(LIBFREENECT2_PATH /home/user/dev/kinect/libfreenect2)
-SET(NITE2_PATH /home/user/dev/kinect/NiTE-Linux-x64-2.2)
+SET(LIBFREENECT2_PATH $ENV{LIBFREENECT2})
+SET(NITE2_PATH $ENV{NITE2})
 
 # Set include and library dirs for ease of use
 SET(OPENNI2_PATH ${LIBFREENECT2_PATH}/drivers/OpenNI2-Freenect2Driver)
@@ -35,7 +35,6 @@ CATKIN_PACKAGE(
 
 INCLUDE_DIRECTORIES(
   include
-  # ${CMAKE_SOURCE_DIR}/include
   ${EIGEN3_INCLUDE_DIR}
   ${GLUT_INCLUDE_DIRS}
   ${OPENGL_INCLUDE_DIRS}
@@ -78,8 +77,6 @@ ADD_EXECUTABLE(mainViewRviz
   src/kinect_v2/skviewer-rviz.cpp
 )
 TARGET_LINK_LIBRARIES(mainViewRviz
-  ${GLUT_LIBRARY}
-  ${OPENGL_LIBRARIES}
   ${OPENNI2_LIBRARIES}
   ${NITE2_LIBRARIES}
   ${PROJECT_NAME}
@@ -91,8 +88,6 @@ ADD_EXECUTABLE(mainBodyArray
   src/kinect_v2/skbody-array.cpp
 )
 TARGET_LINK_LIBRARIES(mainBodyArray
-  ${GLUT_LIBRARY}
-  ${OPENGL_LIBRARIES}
   ${OPENNI2_LIBRARIES}
   ${NITE2_LIBRARIES}
   ${PROJECT_NAME}
