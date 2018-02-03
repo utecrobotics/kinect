@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>kinect_msgs</name>
+  <version>0.0.0</version>
+  <description>
+    Messages for interacting with the kinect data
+  </description>
+
+  <author email="oramos@utec.edu.pe">Oscar Ramos</author>
+  <maintainer email="oramos@utec.edu.pe">Oscar Ramos</maintainer>
+  <license>BSD</license>
+
+  <build_depend>message_generation</build_depend>
+  <exec_depend>message_runtime</exec_depend>
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+  </export>
+
+</package>
