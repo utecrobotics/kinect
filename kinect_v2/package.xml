@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>kinect_v2</name>
+  <version>0.0.0</version>
+  <description>
+    Interface with the kinect_v2 for using the skeleton tracking
+  </description>
+
+  <maintainer email="oramos@utec.edu.pe">Oscar Ramos</maintainer>
+  <author email="oramos@utec.edu.pe">Oscar Ramos</author>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>roscpp</build_depend>
+  <build_depend>kinect_msgs</build_depend>
+  <build_export_depend>roscpp</build_export_depend>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>kinect_msgs</exec_depend>
+
+  <export>
+  </export>
+</package>
