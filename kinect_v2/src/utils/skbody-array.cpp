@@ -1,5 +1,7 @@
 /*********************************************************
 *                                                        *
+*  Publish topics to BodyArray for NAO teleoperation     *
+*  (see the nao_kinect_teleop package)                   *
 *                                                        *
 *********************************************************/
 
@@ -69,15 +71,14 @@ SkBodyArray::SkBodyArray(const char* strName,
   // Resize the markers size (for all the limbs)
   markers_.resize(6);
   // Initialize the markers
-  double color_green[3] = {0.0, 1.0, 0.0};
   for (unsigned int i=0; i<markers_.size(); ++i)
   {
-    markers_[i] = new BallMarker(nh_, color_green);
+    markers_[i] = new BallMarker(nh_, GREEN);
   }
-  lines_ = new LineMarker(nh_, color_green);
+  lines_ = new LineMarker(nh_, GREEN);
   // Create the publisher
   pub_ = nh.advertise<kinect_msgs::BodyArray>("kinect_points", 10);
-  
+
 }
 
 
@@ -316,8 +317,7 @@ void SkBodyArray::DrawLimb(const nite::SkeletonJoint& joint1,
   if (joint1.getPositionConfidence() == 1 && joint2.getPositionConfidence() == 1)
   {
     // For lines in rviz
-    double color_green[3] = {0.0, 1.0, 0.0};
-    lines_->setColor(color_green);
+    lines_->setColor(GREEN);
     p_ <<
       -joint1.getPosition().z/1000.0,
       joint1.getPosition().x/1000.0,
@@ -337,8 +337,7 @@ void SkBodyArray::DrawLimb(const nite::SkeletonJoint& joint1,
   else
   {
     // For lines in rviz
-    double color_gray[3] = {0.5, 0.5, 0.5};
-    lines_->setColor(color_gray);
+    lines_->setColor(LIGHTGRAY);
     p_ <<
       -joint1.getPosition().z/1000.0,
       joint1.getPosition().x/1000.0,

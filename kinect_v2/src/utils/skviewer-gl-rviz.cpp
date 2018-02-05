@@ -72,12 +72,11 @@ SkViewerGlRviz::SkViewerGlRviz(const char* strName,
   // Resize the markers size (for all the limbs)
   markers_.resize(15);
   // Initialize the markers
-  double color_green[3] = {0.0, 1.0, 0.0};
   for (unsigned int i=0; i<markers_.size(); ++i)
   {
-    markers_[i] = new BallMarker(nh_, color_green);
+    markers_[i] = new BallMarker(nh_, GREEN);
   }
-  lines_ = new LineMarker(nh_, color_green);
+  lines_ = new LineMarker(nh_, GREEN);
 }
 
 
@@ -307,8 +306,6 @@ void SkViewerGlRviz::show_marker(const nite::SkeletonJoint& joint,
 {
   if (joint.getPositionConfidence() == 1)
   {
-    // double color_green[3] = {0.0, 0.1, 0.0};
-
     // Convert from mm to m
     if (false)
     {
@@ -319,7 +316,7 @@ void SkViewerGlRviz::show_marker(const nite::SkeletonJoint& joint,
         joint.getPosition().z/1000.0;
     }
     // In the system of RViz
-    // markers_[marker_id].setColor(color_green);
+    // markers_[marker_id].setColor(GREEN);
     p_ <<
       -joint.getPosition().z/1000.0,
       joint.getPosition().x/1000.0,
@@ -334,8 +331,7 @@ void SkViewerGlRviz::show_marker(const nite::SkeletonJoint& joint,
   }
   else
   {
-    // double color_gray[3] = {0.5, 0.5, 0.5};
-    // markers_[marker_id].setColor(color_gray);
+    // markers_[marker_id].setColor(LIGHTGRAY);
     p_ <<
       -joint.getPosition().z/1000.0,
       joint.getPosition().x/1000.0,
