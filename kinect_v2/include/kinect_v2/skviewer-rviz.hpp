@@ -75,7 +75,7 @@ private:
   // Joint Position
   Eigen::VectorXd p_;
   // For skeleton lines
-  LineListMarker* lines_;
+  LineMarker* lines_;
 
   // Publish to a given topic
   //void publish_data();

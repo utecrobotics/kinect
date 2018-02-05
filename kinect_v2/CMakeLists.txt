@@ -44,10 +44,13 @@ INCLUDE_DIRECTORIES(
 )
 
 ADD_LIBRARY(${PROJECT_NAME}
-  src/utils/markers.cpp
+  src/utils/marker.cpp
+  src/utils/ball-marker.cpp
+  src/utils/frame-marker.cpp
+  src/utils/line-marker.cpp
 )
 
-
+# Viewer using only OpenGL
 ADD_EXECUTABLE(mainViewGl
   src/main-view-gl.cpp
   src/utils/skviewer-gl.cpp
@@ -59,6 +62,7 @@ TARGET_LINK_LIBRARIES(mainViewGl
   ${NITE2_LIBRARIES}
 )
 
+# Viewer using OpenGL and Rviz
 ADD_EXECUTABLE(mainViewGlRviz
   src/main-view-gl-rviz.cpp
   src/utils/skviewer-gl-rviz.cpp
@@ -72,6 +76,7 @@ TARGET_LINK_LIBRARIES(mainViewGlRviz
   ${catkin_LIBRARIES}
 )
 
+# Viewer using only RViz
 ADD_EXECUTABLE(mainViewRviz
   src/main-view-rviz.cpp
   src/utils/skviewer-rviz.cpp
@@ -83,6 +88,7 @@ TARGET_LINK_LIBRARIES(mainViewRviz
   ${catkin_LIBRARIES}
 )
 
+# Publisher of BodyArray messages and show in RViz
 ADD_EXECUTABLE(mainBodyArray
   src/main-body-array.cpp
   src/utils/skbody-array.cpp

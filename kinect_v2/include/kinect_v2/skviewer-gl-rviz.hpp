@@ -76,7 +76,7 @@ private:
   Eigen::VectorXd p_;
 
   // For skeleton lines
-  LineListMarker* lines_;
+  LineMarker* lines_;
 };
 
 

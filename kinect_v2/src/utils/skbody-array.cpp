@@ -74,7 +74,7 @@ SkBodyArray::SkBodyArray(const char* strName,
   {
     markers_[i] = new BallMarker(nh_, color_green);
   }
-  lines_ = new LineListMarker(nh_, color_green);
+  lines_ = new LineMarker(nh_, color_green);
   // Create the publisher
   pub_ = nh.advertise<kinect_msgs::BodyArray>("kinect_points", 10);
   
