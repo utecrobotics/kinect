@@ -60,14 +60,14 @@ private:
   ros::NodeHandle nh_;
 
   // Markers
-  std::vector<BallMarker> markers_;
+  std::vector<BallMarker*> markers_;
   void show_marker(const nite::SkeletonJoint& joint,
                    const unsigned int& marker_id,
                    const std::string& joint_name);
   // Joint Position
   Eigen::VectorXd p_;
   // For skeleton lines
-  LineListMarker lines_;
+  LineListMarker* lines_;
 
   // Publish to a given topic
   ros::Publisher pub_;

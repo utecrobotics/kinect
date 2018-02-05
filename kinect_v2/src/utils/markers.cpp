@@ -22,45 +22,31 @@
 
 Marker::Marker(ros::NodeHandle& nh)
 {
-  initialize(nh);
-  // nh.param<std::string>("reference_frame", reference_frame_, "/map");
-  // marker_pub_ =
-  //   nh.advertise<visualization_msgs::Marker>("visualization_marker", 10);
-}
-
-Marker::Marker()
-{
-}
-
-void Marker::initialize(ros::NodeHandle& nh)
-{
   nh.param<std::string>("reference_frame", reference_frame_, "/map");
   marker_pub_ =
     nh.advertise<visualization_msgs::Marker>("visualization_marker", 10);
 }
 
+// void Marker::initialize(ros::NodeHandle& nh)
+// {
+//   nh.param<std::string>("reference_frame", reference_frame_, "/map");
+//   marker_pub_ =
+//     nh.advertise<visualization_msgs::Marker>("visualization_marker", 10);
+// }
+
 unsigned int Marker::id_=0;
 
 
-LineListMarker::LineListMarker()
-  : Marker()
-{
-}
+// LineListMarker::LineListMarker()
+//   : Marker()
+// {
+// }
 
 LineListMarker::LineListMarker(ros::NodeHandle& nh,
                                double color[3],
                                const double& scale)
   : Marker(nh)
 {
-  init(nh, color, scale);
-}
-
-void LineListMarker::init(ros::NodeHandle& nh, 
-                          double color[3],
-                          const double& scale)
-{
-  initialize(nh);
-
   marker_.header.frame_id = reference_frame_;
   marker_.ns = "line_list_markers";
   marker_.id = id_++;
@@ -111,12 +97,6 @@ void LineListMarker::publish()
 }
 
 
-
-BallMarker::BallMarker()
-  : Marker()
-{
-}
-
 BallMarker::BallMarker(ros::NodeHandle& nh,
                        double color[3],
                        const double& scale)
@@ -144,33 +124,6 @@ BallMarker::BallMarker(ros::NodeHandle& nh,
   marker_.lifetime = ros::Duration();
 }
 
-void BallMarker::init(ros::NodeHandle& nh,
-                       double color[3],
-                       const double& scale)
-{
-  initialize(nh);
-
-  marker_.header.frame_id = reference_frame_;
-  marker_.ns = "ball_markers";
-  marker_.id = id_++;
-  marker_.type = visualization_msgs::Marker::SPHERE;
-  marker_.action = visualization_msgs::Marker::ADD;
-  marker_.pose.position.x = 0.0;
-  marker_.pose.position.y = 0.0;
-  marker_.pose.position.z = 0.0;
-  marker_.pose.orientation.x = 0.0;
-  marker_.pose.orientation.y = 0.0;
-  marker_.pose.orientation.z = 0.0;
-  marker_.pose.orientation.w = 1.0;
-  marker_.scale.x = scale;   // m
-  marker_.scale.y = scale;   // m
-  marker_.scale.z = scale;   // m
-  marker_.color.r = color[0];
-  marker_.color.g = color[1];
-  marker_.color.b = color[2];
-  marker_.color.a = 1.0;
-  marker_.lifetime = ros::Duration();
-}
 
 void BallMarker::setColor(double color[3])
 {

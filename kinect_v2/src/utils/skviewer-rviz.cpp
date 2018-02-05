@@ -74,9 +74,9 @@ SkViewerRviz::SkViewerRviz(const char* strName,
   double color_green[3] = {0.0, 1.0, 0.0};
   for (unsigned int i=0; i<markers_.size(); ++i)
   {
-    markers_[i].init(nh_, color_green);
+    markers_[i] = new BallMarker(nh_, color_green);
   }
-  lines_.init(nh_, color_green);
+  lines_ = new LineListMarker(nh_, color_green);
   // Create the publisher
   pub_ = nh.advertise<kinect_msgs::Skeleton>("kinect_joints", 10);
   
@@ -316,8 +316,8 @@ void SkViewerRviz::show_marker(const nite::SkeletonJoint& joint,
       joint.getPosition().x/1000.0,
       joint.getPosition().y/1000.0;
     // Publish the values to the markers
-    markers_[marker_id].setPose(p_);
-    markers_[marker_id].publish();
+    markers_[marker_id]->setPose(p_);
+    markers_[marker_id]->publish();
     // Store data in ROS message
     skeleton_.name.at(marker_id-offset_) = joint_name;
     skeleton_.confidence.at(marker_id-offset_) = joint.getPositionConfidence();
@@ -349,8 +349,8 @@ void SkViewerRviz::show_marker(const nite::SkeletonJoint& joint,
       -joint.getPosition().z/1000.0,
       joint.getPosition().x/1000.0,
       joint.getPosition().y/1000.0;
-    markers_[marker_id].setPose(p_);
-    markers_[marker_id].publish();
+    markers_[marker_id]->setPose(p_);
+    markers_[marker_id]->publish();
 
     return;
   }
@@ -385,17 +385,17 @@ void SkViewerRviz::DrawLimb(const nite::SkeletonJoint& joint1,
     //           1.0f - Colors[color][2]);
     // For lines in rviz
     double color_green[3] = {0.0, 1.0, 0.0};
-    lines_.setColor(color_green);
+    lines_->setColor(color_green);
     p_ <<
       -joint1.getPosition().z/1000.0,
       joint1.getPosition().x/1000.0,
       joint1.getPosition().y/1000.0;
-    lines_.setPose(p_);
+    lines_->setPose(p_);
     p_ <<
       -joint2.getPosition().z/1000.0,
       joint2.getPosition().x/1000.0,
       joint2.getPosition().y/1000.0;
-    lines_.setPose(p_);
+    lines_->setPose(p_);
   }
   else if (joint1.getPositionConfidence() < 0.5f ||
            joint2.getPositionConfidence() < 0.5f)
@@ -408,17 +408,17 @@ void SkViewerRviz::DrawLimb(const nite::SkeletonJoint& joint1,
 
     // For lines in rviz
     double color_gray[3] = {0.5, 0.5, 0.5};
-    lines_.setColor(color_gray);
+    lines_->setColor(color_gray);
     p_ <<
       -joint1.getPosition().z/1000.0,
       joint1.getPosition().x/1000.0,
       joint1.getPosition().y/1000.0;
-    lines_.setPose(p_);
+    lines_->setPose(p_);
     p_ <<
       -joint2.getPosition().z/1000.0,
       joint2.getPosition().x/1000.0,
       joint2.getPosition().y/1000.0;
-    lines_.setPose(p_);
+    lines_->setPose(p_);
 
   }
   // glPointSize(2);
@@ -456,7 +456,7 @@ void SkViewerRviz::DrawLimb(const nite::SkeletonJoint& joint1,
 
 void SkViewerRviz::DrawSkeleton(const nite::UserData& userData)
 {
-  lines_.reset();
+  lines_->reset();
   DrawLimb(userData.getSkeleton().getJoint(nite::JOINT_HEAD),
            userData.getSkeleton().getJoint(nite::JOINT_NECK),
            userData.getId() % colorCount);
@@ -513,7 +513,7 @@ void SkViewerRviz::DrawSkeleton(const nite::UserData& userData)
   DrawLimb(userData.getSkeleton().getJoint(nite::JOINT_RIGHT_KNEE),
            userData.getSkeleton().getJoint(nite::JOINT_RIGHT_FOOT),
            userData.getId() % colorCount);
-  lines_.publish();
+  lines_->publish();
 
   // Initialize size of pub_
   skeleton_.name.resize(15);

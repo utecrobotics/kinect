@@ -29,9 +29,7 @@ class Marker
 {
 public:
 
-  Marker();
   Marker(ros::NodeHandle& nh);
-  void initialize(ros::NodeHandle& nh);
   virtual void setPose(const Eigen::VectorXd& position) = 0;
   virtual void publish() = 0;
 
@@ -50,10 +48,6 @@ public:
   LineListMarker(ros::NodeHandle& nh,
                  double color[3],
                  const double& scale=0.01);
-  LineListMarker();
-  void init(ros::NodeHandle& nh, 
-            double color[3],
-            const double& scale=0.01);
   void reset();
   void setPose(const Eigen::VectorXd& position);
   void publish();
@@ -70,21 +64,14 @@ public:
   BallMarker(ros::NodeHandle& nh,
              double color[3],
              const double& scale=0.05);
-  BallMarker();
-
-  void init(ros::NodeHandle& nh,
-            double color[3],
-            const double& scale=0.05);
 
   void setPose(const Eigen::VectorXd& position);
   void setColor(double color[3]);
-
   void publish();
 
 private:
 
   visualization_msgs::Marker marker_;
-  //static unsigned int id_;
 };
 
 
