@@ -44,13 +44,13 @@ INCLUDE_DIRECTORIES(
 )
 
 ADD_LIBRARY(${PROJECT_NAME}
-  src/kinect_v2/markers.cpp
+  src/utils/markers.cpp
 )
 
 
 ADD_EXECUTABLE(mainViewGl
   src/main-view-gl.cpp
-  src/kinect_v2/skviewer-gl.cpp
+  src/utils/skviewer-gl.cpp
 )
 TARGET_LINK_LIBRARIES(mainViewGl
   ${GLUT_LIBRARY}
@@ -61,7 +61,7 @@ TARGET_LINK_LIBRARIES(mainViewGl
 
 ADD_EXECUTABLE(mainViewGlRviz
   src/main-view-gl-rviz.cpp
-  src/kinect_v2/skviewer-gl-rviz.cpp
+  src/utils/skviewer-gl-rviz.cpp
 )
 TARGET_LINK_LIBRARIES(mainViewGlRviz
   ${GLUT_LIBRARY}
@@ -74,7 +74,7 @@ TARGET_LINK_LIBRARIES(mainViewGlRviz
 
 ADD_EXECUTABLE(mainViewRviz
   src/main-view-rviz.cpp
-  src/kinect_v2/skviewer-rviz.cpp
+  src/utils/skviewer-rviz.cpp
 )
 TARGET_LINK_LIBRARIES(mainViewRviz
   ${OPENNI2_LIBRARIES}
@@ -85,7 +85,7 @@ TARGET_LINK_LIBRARIES(mainViewRviz
 
 ADD_EXECUTABLE(mainBodyArray
   src/main-body-array.cpp
-  src/kinect_v2/skbody-array.cpp
+  src/utils/skbody-array.cpp
 )
 TARGET_LINK_LIBRARIES(mainBodyArray
   ${OPENNI2_LIBRARIES}
