@@ -38,6 +38,8 @@ const int g_poseTimeoutToExit = 2000;
 // Other constants
 #define MAX_USERS 10
 
+bool SHOW_MARKERS = false;
+
 nite::SkeletonState g_skeletonStates[MAX_USERS] = {nite::SKELETON_NONE};
 bool g_visibleUsers[MAX_USERS] = {false};
 char g_userStatusLabels[MAX_USERS][100] = {{0}};
@@ -68,15 +70,18 @@ SkBodyArray::SkBodyArray(const char* strName,
   userTrackerPtr_ = new nite::UserTracker;
   // Resize for positions
   p_.resize(3);
-  // Resize the markers size (for all the limbs)
-  markers_.resize(6);
-  // Initialize the markers
-  for (unsigned int i=0; i<markers_.size(); ++i)
+  if (SHOW_MARKERS)
   {
-    markers_[i] = new BallMarker(nh_, GREEN);
+    // Resize the markers size (for all the limbs)
+    markers_.resize(6);
+    // Initialize the markers
+    for (unsigned int i=0; i<markers_.size(); ++i)
+    {
+      markers_[i] = new BallMarker(nh_, GREEN);
+    }
+    lines_ = new LineMarker(nh_, GREEN);
   }
-  lines_ = new LineMarker(nh_, GREEN);
-  // Create the publisher
+    // Create the publisher
   pub_ = nh.advertise<kinect_msgs::BodyArray>("kinect_points", 10);
 
 }
@@ -252,14 +257,17 @@ void SkBodyArray::show_marker(const nite::SkeletonJoint& joint,
 {
   if (joint.getPositionConfidence() == 1)
   {
-    // Convert from mm to m
-    p_ <<
-      -joint.getPosition().z/1000.0,
-      joint.getPosition().x/1000.0,
-      joint.getPosition().y/1000.0;
-    // Publish the values to the markers
-    markers_[marker_id]->setPose(p_);
-    markers_[marker_id]->publish();
+    if (SHOW_MARKERS)
+    {
+      // Convert from mm to m
+      p_ <<
+        -joint.getPosition().z/1000.0,
+        joint.getPosition().x/1000.0,
+        joint.getPosition().y/1000.0;
+      // Publish the values to the markers
+      markers_[marker_id]->setPose(p_);
+      markers_[marker_id]->publish();
+    }
     // Store data in ROS message
     body_array_.body.at(marker_id).x = -joint.getPosition().z/1000.0;
     body_array_.body.at(marker_id).y = joint.getPosition().x/1000.0;
@@ -281,13 +289,15 @@ void SkBodyArray::show_marker(const nite::SkeletonJoint& joint,
     body_array_.body.at(marker_id).y = joint.getPosition().x/1000.0;
     body_array_.body.at(marker_id).z = joint.getPosition().y/1000.0;
 
-    p_ <<
-      -joint.getPosition().z/1000.0,
-      joint.getPosition().x/1000.0,
-      joint.getPosition().y/1000.0;
-    markers_[marker_id]->setPose(p_);
-    markers_[marker_id]->publish();
-
+    if (SHOW_MARKERS)
+    {
+      p_ <<
+        -joint.getPosition().z/1000.0,
+        joint.getPosition().x/1000.0,
+        joint.getPosition().y/1000.0;
+      markers_[marker_id]->setPose(p_);
+      markers_[marker_id]->publish();
+    }
     return;
   }
 }
@@ -317,17 +327,20 @@ void SkBodyArray::DrawLimb(const nite::SkeletonJoint& joint1,
   if (joint1.getPositionConfidence() == 1 && joint2.getPositionConfidence() == 1)
   {
     // For lines in rviz
-    lines_->setColor(GREEN);
-    p_ <<
-      -joint1.getPosition().z/1000.0,
-      joint1.getPosition().x/1000.0,
-      joint1.getPosition().y/1000.0;
-    lines_->setPose(p_);
-    p_ <<
-      -joint2.getPosition().z/1000.0,
-      joint2.getPosition().x/1000.0,
-      joint2.getPosition().y/1000.0;
-    lines_->setPose(p_);
+    if (SHOW_MARKERS)
+    {
+      lines_->setColor(GREEN);
+      p_ <<
+        -joint1.getPosition().z/1000.0,
+        joint1.getPosition().x/1000.0,
+        joint1.getPosition().y/1000.0;
+      lines_->setPose(p_);
+      p_ <<
+        -joint2.getPosition().z/1000.0,
+        joint2.getPosition().x/1000.0,
+        joint2.getPosition().y/1000.0;
+      lines_->setPose(p_);
+    }
   }
   else if (joint1.getPositionConfidence() < 0.5f ||
            joint2.getPositionConfidence() < 0.5f)
@@ -336,19 +349,21 @@ void SkBodyArray::DrawLimb(const nite::SkeletonJoint& joint1,
   }
   else
   {
-    // For lines in rviz
-    lines_->setColor(LIGHTGRAY);
-    p_ <<
-      -joint1.getPosition().z/1000.0,
-      joint1.getPosition().x/1000.0,
-      joint1.getPosition().y/1000.0;
-    lines_->setPose(p_);
-    p_ <<
-      -joint2.getPosition().z/1000.0,
-      joint2.getPosition().x/1000.0,
-      joint2.getPosition().y/1000.0;
-    lines_->setPose(p_);
-
+    if (SHOW_MARKERS)
+    {
+      // For lines in rviz
+      lines_->setColor(LIGHTGRAY);
+      p_ <<
+        -joint1.getPosition().z/1000.0,
+        joint1.getPosition().x/1000.0,
+        joint1.getPosition().y/1000.0;
+      lines_->setPose(p_);
+      p_ <<
+        -joint2.getPosition().z/1000.0,
+        joint2.getPosition().x/1000.0,
+        joint2.getPosition().y/1000.0;
+      lines_->setPose(p_);
+    }
   }
 
   if (joint1.getPositionConfidence() == 1)
@@ -369,7 +384,8 @@ void SkBodyArray::DrawLimb(const nite::SkeletonJoint& joint1,
 
 void SkBodyArray::DrawSkeleton(const nite::UserData& userData)
 {
-  lines_->reset();
+  if (SHOW_MARKERS)
+    lines_->reset();
 
   DrawLimb(userData.getSkeleton().getJoint(nite::JOINT_LEFT_SHOULDER),
            userData.getSkeleton().getJoint(nite::JOINT_LEFT_ELBOW),
@@ -399,7 +415,8 @@ void SkBodyArray::DrawSkeleton(const nite::UserData& userData)
            userData.getSkeleton().getJoint(nite::JOINT_TORSO),
            userData.getId() % colorCount);
 
-  lines_->publish();
+  if (SHOW_MARKERS)
+    lines_->publish();
 
   // Initialize size of pub_
   body_array_.body.resize(6);
@@ -419,7 +436,8 @@ void SkBodyArray::DrawSkeleton(const nite::UserData& userData)
               5, "joint_right_hand");
 
   // body_array_.header.stamp = ros::Time::now();
-  pub_.publish(body_array_);
+  if (SHOW_MARKERS)
+    pub_.publish(body_array_);
 }
 
 
