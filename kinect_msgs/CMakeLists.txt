@@ -14,6 +14,7 @@ add_message_files(
   FILES
   Skeleton.msg
   BodyArray.msg
+  BodyArray2.msg
 )
 
 ## Generate added messages and services with any dependencies listed here

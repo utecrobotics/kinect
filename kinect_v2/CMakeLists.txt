@@ -99,3 +99,15 @@ TARGET_LINK_LIBRARIES(mainBodyArray
   ${PROJECT_NAME}
   ${catkin_LIBRARIES}
 )
+
+# Publisher of BodyArray messages and show in RViz
+ADD_EXECUTABLE(mainBodyArrayOrient
+  src/main-body-array-2.cpp
+  src/utils/skbody-array-2.cpp
+)
+TARGET_LINK_LIBRARIES(mainBodyArrayOrient
+  ${OPENNI2_LIBRARIES}
+  ${NITE2_LIBRARIES}
+  ${PROJECT_NAME}
+  ${catkin_LIBRARIES}
+)
