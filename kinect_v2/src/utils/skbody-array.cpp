@@ -442,8 +442,7 @@ void SkBodyArray::DrawSkeleton(const nite::UserData& userData)
               8, "joint_right_hand");
 
   // body_array_.header.stamp = ros::Time::now();
-  if (SHOW_MARKERS)
-    pub_.publish(body_array_);
+  pub_.publish(body_array_);
 }
 
 
