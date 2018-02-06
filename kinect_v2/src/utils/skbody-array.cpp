@@ -419,7 +419,7 @@ void SkBodyArray::DrawSkeleton(const nite::UserData& userData)
     lines_->publish();
 
   // Initialize size of pub_
-  body_array_.body.resize(6);
+  body_array_.body.resize(9);
 
   // Send Values to RVIZ Markers
   show_marker(userData.getSkeleton().getJoint(nite::JOINT_LEFT_SHOULDER),
@@ -434,6 +434,12 @@ void SkBodyArray::DrawSkeleton(const nite::UserData& userData)
               4, "joint_right_elbow");
   show_marker(userData.getSkeleton().getJoint(nite::JOINT_RIGHT_HAND),
               5, "joint_right_hand");
+  show_marker(userData.getSkeleton().getJoint(nite::JOINT_HEAD),
+              6, "joint_right_hand");
+  show_marker(userData.getSkeleton().getJoint(nite::JOINT_NECK),
+              7, "joint_right_hand");
+  show_marker(userData.getSkeleton().getJoint(nite::JOINT_TORSO),
+              8, "joint_right_hand");
 
   // body_array_.header.stamp = ros::Time::now();
   if (SHOW_MARKERS)
