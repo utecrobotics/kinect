@@ -82,7 +82,7 @@ SkBodyArray::SkBodyArray(const char* strName,
     lines_ = new LineMarker(nh_, GREEN);
   }
     // Create the publisher
-  pub_ = nh.advertise<kinect_msgs::BodyArray>("kinect_points", 10);
+  pub_ = nh.advertise<kinect_msgs::SkeletonFixedOrder>("kinect_points", 10);
 
 }
 
@@ -269,25 +269,25 @@ void SkBodyArray::show_marker(const nite::SkeletonJoint& joint,
       markers_[marker_id]->publish();
     }
     // Store data in ROS message
-    body_array_.body.at(marker_id).x = -joint.getPosition().z/1000.0;
-    body_array_.body.at(marker_id).y = joint.getPosition().x/1000.0;
-    body_array_.body.at(marker_id).z = joint.getPosition().y/1000.0;
+    body_array_.position.at(marker_id).x = -joint.getPosition().z/1000.0;
+    body_array_.position.at(marker_id).y = joint.getPosition().x/1000.0;
+    body_array_.position.at(marker_id).z = joint.getPosition().y/1000.0;
   }
   else if (joint.getPositionConfidence() < 0.5f)
   {
     // Store data in ROS message
-    // body_array_.body.at(marker_id).x = -joint.getPosition().z/1000.0;
-    // body_array_.body.at(marker_id).y = joint.getPosition().x/1000.0;
-    // body_array_.body.at(marker_id).z = joint.getPosition().y/1000.0;
+    // body_array_.position.at(marker_id).x = -joint.getPosition().z/1000.0;
+    // body_array_.position.at(marker_id).y = joint.getPosition().x/1000.0;
+    // body_array_.position.at(marker_id).z = joint.getPosition().y/1000.0;
     return;
   }
   else
   {
     // TODO: maybe change the color of the markers here
     // Store data in ROS message
-    body_array_.body.at(marker_id).x = -joint.getPosition().z/1000.0;
-    body_array_.body.at(marker_id).y = joint.getPosition().x/1000.0;
-    body_array_.body.at(marker_id).z = joint.getPosition().y/1000.0;
+    body_array_.position.at(marker_id).x = -joint.getPosition().z/1000.0;
+    body_array_.position.at(marker_id).y = joint.getPosition().x/1000.0;
+    body_array_.position.at(marker_id).z = joint.getPosition().y/1000.0;
 
     if (SHOW_MARKERS)
     {
@@ -419,7 +419,7 @@ void SkBodyArray::DrawSkeleton(const nite::UserData& userData)
     lines_->publish();
 
   // Initialize size of pub_
-  body_array_.body.resize(9);
+  body_array_.position.resize(9);
 
   // Send Values to RVIZ Markers
   show_marker(userData.getSkeleton().getJoint(nite::JOINT_LEFT_SHOULDER),

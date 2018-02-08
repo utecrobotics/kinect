@@ -9,7 +9,7 @@
 #include "NiTE.h"
 
 #include <kinect_v2/markers.hpp>
-#include <kinect_msgs/BodyArray.h>
+#include <kinect_msgs/SkeletonFixedOrder.h>
 #include "ros/ros.h"
 
 
@@ -71,7 +71,7 @@ private:
 
   // Publish to a given topic
   ros::Publisher pub_;
-  kinect_msgs::BodyArray body_array_;
+  kinect_msgs::SkeletonFixedOrder body_array_;
   unsigned int offset_;
 };
 

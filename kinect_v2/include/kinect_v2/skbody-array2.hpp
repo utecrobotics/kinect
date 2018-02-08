@@ -3,13 +3,13 @@
 *                                                        *
 *********************************************************/
 
-#ifndef _SKBODY_ARRAY_H_
-#define _SKBODY_ARRAY_H_
+#ifndef _SKBODY_ARRAY2_H_
+#define _SKBODY_ARRAY2_H_
 
 #include "NiTE.h"
 
 #include <kinect_v2/markers.hpp>
-#include <kinect_msgs/BodyArray2.h>
+#include <kinect_msgs/SkeletonFixedOrder.h>
 #include "ros/ros.h"
 
 
@@ -72,7 +72,7 @@ private:
 
   // Publish to a given topic
   ros::Publisher pub_;
-  kinect_msgs::BodyArray2 body_array_;
+  kinect_msgs::SkeletonFixedOrder body_array_;
   unsigned int offset_;
 };
 
