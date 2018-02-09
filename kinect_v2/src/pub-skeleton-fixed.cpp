@@ -2,7 +2,7 @@
 #include "ros/ros.h"
 #include <Eigen/Dense>
 
-#include <kinect_v2/skbody-array2.hpp>
+#include <kinect_v2/skfixed.hpp>
 
 
 int main(int argc, char **argv)
@@ -11,7 +11,7 @@ int main(int argc, char **argv)
   ros::NodeHandle nh;
 
   openni::Status rc = openni::STATUS_OK;
-  SkBodyArray2 SkViewer("Viewer printing data", nh);
+  SkFixed SkViewer("Viewer printing data", nh);
 
   rc = SkViewer.Init(argc, argv);
   if (rc != openni::STATUS_OK)

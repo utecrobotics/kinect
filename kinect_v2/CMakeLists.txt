@@ -89,23 +89,11 @@ TARGET_LINK_LIBRARIES(mainViewRviz
 )
 
 # Publisher of BodyArray messages and show in RViz
-ADD_EXECUTABLE(mainBodyArray
-  src/main-body-array.cpp
-  src/utils/skbody-array.cpp
+ADD_EXECUTABLE(pubSkeletonFixed
+  src/pub-skeleton-fixed.cpp
+  src/utils/skfixed.cpp
 )
-TARGET_LINK_LIBRARIES(mainBodyArray
-  ${OPENNI2_LIBRARIES}
-  ${NITE2_LIBRARIES}
-  ${PROJECT_NAME}
-  ${catkin_LIBRARIES}
-)
-
-# Publisher of BodyArray messages and show in RViz
-ADD_EXECUTABLE(mainBodyArrayOrient
-  src/main-body-array-2.cpp
-  src/utils/skbody-array-2.cpp
-)
-TARGET_LINK_LIBRARIES(mainBodyArrayOrient
+TARGET_LINK_LIBRARIES(pubSkeletonFixed
   ${OPENNI2_LIBRARIES}
   ${NITE2_LIBRARIES}
   ${PROJECT_NAME}

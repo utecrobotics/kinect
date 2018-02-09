@@ -1,9 +1,9 @@
-/*********************************************************
-*                                                        *
-*  Publish topics to BodyArray for NAO teleoperation     *
-*  (see the nao_kinect_teleop package)                   *
-*                                                        *
-*********************************************************/
+/***************************************************************
+*                                                              *
+*  Publish topics to SkeletonFixedOrder for NAO teleoperation  *
+*  (see the nao_kinect_teleop package)                         *
+*                                                              *
+***************************************************************/
 
 #define __STDC_FORMAT_MACROS
 #include <inttypes.h>
@@ -12,15 +12,22 @@
 
 #include <Eigen/Dense>
 
-#include "kinect_v2/skbody-array.hpp"
+#include "kinect_v2/skfixed.hpp"
 #include <kinect_v2/NiteSampleUtilities.h>
 
 #define GL_WIN_SIZE_X 1280
 #define GL_WIN_SIZE_Y 1024
 #define TEXTURE_SIZE  512
 
+//----------------------------------
+// Flags to show the markers
+//----------------------------------
+bool SHOW_MARKERS = false;
+// If false, frame markers are shown
+bool SHOW_BALL_MARKERS = false;
+//----------------------------------
 
-SkBodyArray* SkBodyArray::self_ = NULL;
+SkFixed* SkFixed::self_ = NULL;
 
 bool g_drawSkeleton     = true;
 bool g_drawCenterOfMass = false;
@@ -38,8 +45,6 @@ const int g_poseTimeoutToExit = 2000;
 // Other constants
 #define MAX_USERS 10
 
-bool SHOW_MARKERS = false;
-
 nite::SkeletonState g_skeletonStates[MAX_USERS] = {nite::SKELETON_NONE};
 bool g_visibleUsers[MAX_USERS] = {false};
 char g_userStatusLabels[MAX_USERS][100] = {{0}};
@@ -56,8 +61,8 @@ float Colors[][3] = {{1, 0, 0},
                      {1, 1, 1}};
 
 
-SkBodyArray::SkBodyArray(const char* strName,
-                               ros::NodeHandle& nh)
+SkFixed::SkFixed(const char* strName,
+                 ros::NodeHandle& nh)
   :
   poseUser_(0),
   nh_(nh)
@@ -68,26 +73,31 @@ SkBodyArray::SkBodyArray(const char* strName,
   strncpy(strName_, strName, ONI_MAX_STR);
   // New User Tracker
   userTrackerPtr_ = new nite::UserTracker;
-  // Resize for positions
-  p_.resize(3);
+  // Resize for poses and positions
+  pose_.resize(7);
+  position_.resize(3);
+
   if (SHOW_MARKERS)
   {
-    // Resize the markers size (for all the limbs)
-    markers_.resize(6);
+    // Resize the ball and frame markers size. Currently only shoulders,
+    // elbows, hands, head, neck and torso
+    ball_markers_.resize(9);
+    frame_markers_.resize(9);
     // Initialize the markers
-    for (unsigned int i=0; i<markers_.size(); ++i)
+    for (unsigned int i=0; i<ball_markers_.size(); ++i)
     {
-      markers_[i] = new BallMarker(nh_, GREEN);
+      ball_markers_[i]  = new BallMarker(nh_, GREEN);
+      frame_markers_[i] = new FrameMarker(nh_);
     }
-    lines_ = new LineMarker(nh_, GREEN);
+    line_markers_ = new LineMarker(nh_, GREEN);
   }
     // Create the publisher
-  pub_ = nh.advertise<kinect_msgs::SkeletonFixedOrder>("kinect_points", 10);
+  pub_ = nh.advertise<kinect_msgs::SkeletonFixedOrder>("kinect_skeleton", 10);
 
 }
 
 
-SkBodyArray::~SkBodyArray()
+SkFixed::~SkFixed()
 {
   Finalize();
   delete[] pTexMap_;
@@ -95,7 +105,7 @@ SkBodyArray::~SkBodyArray()
 }
 
 
-void SkBodyArray::Finalize()
+void SkFixed::Finalize()
 {
   // Delete the main object
   delete userTrackerPtr_;
@@ -104,7 +114,7 @@ void SkBodyArray::Finalize()
 }
 
 
-openni::Status SkBodyArray::Init(int argc, char **argv)
+openni::Status SkFixed::Init(int argc, char **argv)
 {
   pTexMap_ = NULL;
 
@@ -251,59 +261,100 @@ void PrintCoordinates(const nite::SkeletonJoint& joint,
 }
 
 
-void SkBodyArray::show_marker(const nite::SkeletonJoint& joint,
-                               const unsigned int& marker_id,
-                               const std::string& joint_name)
+void SkFixed::show_marker(const nite::SkeletonJoint& joint,
+                          const unsigned int& marker_id,
+                          const std::string& joint_name)
 {
   if (joint.getPositionConfidence() == 1)
   {
+    // Store the joint data in a ROS message (in m)
+    skeleton_msg_.position.at(marker_id).x = -joint.getPosition().z/1000.0;
+    skeleton_msg_.position.at(marker_id).y = joint.getPosition().x/1000.0;
+    skeleton_msg_.position.at(marker_id).z = joint.getPosition().y/1000.0;
+    skeleton_msg_.orientation.at(marker_id).w = joint.getOrientation().w;
+    skeleton_msg_.orientation.at(marker_id).x = joint.getOrientation().x;
+    skeleton_msg_.orientation.at(marker_id).y = joint.getOrientation().y;
+    skeleton_msg_.orientation.at(marker_id).z = joint.getOrientation().z;
+    // Show the markers, if requested
     if (SHOW_MARKERS)
     {
-      // Convert from mm to m
-      p_ <<
-        -joint.getPosition().z/1000.0,
-        joint.getPosition().x/1000.0,
-        joint.getPosition().y/1000.0;
-      // Publish the values to the markers
-      markers_[marker_id]->setPose(p_);
-      markers_[marker_id]->publish();
+      if (SHOW_BALL_MARKERS)
+      {
+        position_ <<
+          -joint.getPosition().z/1000.0,
+          joint.getPosition().x/1000.0,
+          joint.getPosition().y/1000.0;
+        ball_markers_[marker_id]->setPose(position_);
+        ball_markers_[marker_id]->publish();
+      }
+      else
+      {
+        pose_ <<
+          -joint.getPosition().z/1000.0,
+          joint.getPosition().x/1000.0,
+          joint.getPosition().y/1000.0,
+          joint.getOrientation().w,
+          joint.getOrientation().x,
+          joint.getOrientation().y,
+          joint.getOrientation().z;
+        frame_markers_[marker_id]->setPose(pose_);
+        frame_markers_[marker_id]->publish();
+      }
     }
-    // Store data in ROS message
-    body_array_.position.at(marker_id).x = -joint.getPosition().z/1000.0;
-    body_array_.position.at(marker_id).y = joint.getPosition().x/1000.0;
-    body_array_.position.at(marker_id).z = joint.getPosition().y/1000.0;
   }
+
   else if (joint.getPositionConfidence() < 0.5f)
   {
     // Store data in ROS message
-    // body_array_.position.at(marker_id).x = -joint.getPosition().z/1000.0;
-    // body_array_.position.at(marker_id).y = joint.getPosition().x/1000.0;
-    // body_array_.position.at(marker_id).z = joint.getPosition().y/1000.0;
+    // skeleton_msg_.position.at(marker_id).x = -joint.getPosition().z/1000.0;
+    // skeleton_msg_.position.at(marker_id).y = joint.getPosition().x/1000.0;
+    // skeleton_msg_.position.at(marker_id).z = joint.getPosition().y/1000.0;
     return;
   }
   else
   {
     // TODO: maybe change the color of the markers here
     // Store data in ROS message
-    body_array_.position.at(marker_id).x = -joint.getPosition().z/1000.0;
-    body_array_.position.at(marker_id).y = joint.getPosition().x/1000.0;
-    body_array_.position.at(marker_id).z = joint.getPosition().y/1000.0;
+    skeleton_msg_.position.at(marker_id).x = -joint.getPosition().z/1000.0;
+    skeleton_msg_.position.at(marker_id).y = joint.getPosition().x/1000.0;
+    skeleton_msg_.position.at(marker_id).z = joint.getPosition().y/1000.0;
+    skeleton_msg_.orientation.at(marker_id).w = joint.getOrientation().w;
+    skeleton_msg_.orientation.at(marker_id).x = joint.getOrientation().x;
+    skeleton_msg_.orientation.at(marker_id).y = joint.getOrientation().y;
+    skeleton_msg_.orientation.at(marker_id).z = joint.getOrientation().z;
 
     if (SHOW_MARKERS)
     {
-      p_ <<
-        -joint.getPosition().z/1000.0,
-        joint.getPosition().x/1000.0,
-        joint.getPosition().y/1000.0;
-      markers_[marker_id]->setPose(p_);
-      markers_[marker_id]->publish();
+      if (SHOW_BALL_MARKERS)
+      {
+        position_ <<
+          -joint.getPosition().z/1000.0,
+          joint.getPosition().x/1000.0,
+          joint.getPosition().y/1000.0;
+        ball_markers_[marker_id]->setPose(position_);
+        ball_markers_[marker_id]->publish();
+      }
+      else
+      {
+        pose_ <<
+          -joint.getPosition().z/1000.0,
+          joint.getPosition().x/1000.0,
+          joint.getPosition().y/1000.0,
+          joint.getOrientation().w,
+          joint.getOrientation().x,
+          joint.getOrientation().y,
+          joint.getOrientation().z;
+        frame_markers_[marker_id]->setPose(pose_);
+        frame_markers_[marker_id]->publish();
+
+      }
     }
     return;
   }
 }
 
 
-void SkBodyArray::DrawLimb(const nite::SkeletonJoint& joint1,
+void SkFixed::DrawLimb(const nite::SkeletonJoint& joint1,
                        const nite::SkeletonJoint& joint2,
                        int color)
 {
@@ -326,22 +377,23 @@ void SkBodyArray::DrawLimb(const nite::SkeletonJoint& joint1,
 
   if (joint1.getPositionConfidence() == 1 && joint2.getPositionConfidence() == 1)
   {
-    // For lines in rviz
+    // Show lines as skeleton markers
     if (SHOW_MARKERS)
     {
-      lines_->setColor(GREEN);
-      p_ <<
+      line_markers_->setColor(GREEN);
+      position_ <<
         -joint1.getPosition().z/1000.0,
         joint1.getPosition().x/1000.0,
         joint1.getPosition().y/1000.0;
-      lines_->setPose(p_);
-      p_ <<
+      line_markers_->setPose(position_);
+      position_ <<
         -joint2.getPosition().z/1000.0,
         joint2.getPosition().x/1000.0,
         joint2.getPosition().y/1000.0;
-      lines_->setPose(p_);
+      line_markers_->setPose(position_);
     }
   }
+
   else if (joint1.getPositionConfidence() < 0.5f ||
            joint2.getPositionConfidence() < 0.5f)
   {
@@ -352,17 +404,17 @@ void SkBodyArray::DrawLimb(const nite::SkeletonJoint& joint1,
     if (SHOW_MARKERS)
     {
       // For lines in rviz
-      lines_->setColor(LIGHTGRAY);
-      p_ <<
+      line_markers_->setColor(LIGHTGRAY);
+      position_ <<
         -joint1.getPosition().z/1000.0,
         joint1.getPosition().x/1000.0,
         joint1.getPosition().y/1000.0;
-      lines_->setPose(p_);
-      p_ <<
+      line_markers_->setPose(position_);
+      position_ <<
         -joint2.getPosition().z/1000.0,
         joint2.getPosition().x/1000.0,
         joint2.getPosition().y/1000.0;
-      lines_->setPose(p_);
+      line_markers_->setPose(position_);
     }
   }
 
@@ -382,10 +434,10 @@ void SkBodyArray::DrawLimb(const nite::SkeletonJoint& joint1,
 }
 
 
-void SkBodyArray::DrawSkeleton(const nite::UserData& userData)
+void SkFixed::DrawSkeleton(const nite::UserData& userData)
 {
   if (SHOW_MARKERS)
-    lines_->reset();
+    line_markers_->reset();
 
   DrawLimb(userData.getSkeleton().getJoint(nite::JOINT_LEFT_SHOULDER),
            userData.getSkeleton().getJoint(nite::JOINT_LEFT_ELBOW),
@@ -393,7 +445,6 @@ void SkBodyArray::DrawSkeleton(const nite::UserData& userData)
   DrawLimb(userData.getSkeleton().getJoint(nite::JOINT_LEFT_ELBOW),
            userData.getSkeleton().getJoint(nite::JOINT_LEFT_HAND),
            userData.getId() % colorCount);
-
   // PrintCoordinates(userData.getSkeleton().getJoint(nite::JOINT_LEFT_HAND),
   //                  "left_hand");
 
@@ -416,10 +467,11 @@ void SkBodyArray::DrawSkeleton(const nite::UserData& userData)
            userData.getId() % colorCount);
 
   if (SHOW_MARKERS)
-    lines_->publish();
+    line_markers_->publish();
 
   // Initialize size of pub_
-  body_array_.position.resize(9);
+  skeleton_msg_.position.resize(9);
+  skeleton_msg_.orientation.resize(9);
 
   // Send Values to RVIZ Markers
   show_marker(userData.getSkeleton().getJoint(nite::JOINT_LEFT_SHOULDER),
@@ -441,12 +493,12 @@ void SkBodyArray::DrawSkeleton(const nite::UserData& userData)
   show_marker(userData.getSkeleton().getJoint(nite::JOINT_TORSO),
               8, "joint_right_hand");
 
-  // body_array_.header.stamp = ros::Time::now();
-  pub_.publish(body_array_);
+  // skeleton_msg_.header.stamp = ros::Time::now();
+  pub_.publish(skeleton_msg_);
 }
 
 
-void SkBodyArray::Display()
+void SkFixed::Display()
 {
   openni::VideoFrameRef depthFrame;
   // Pointer to the next frame of data

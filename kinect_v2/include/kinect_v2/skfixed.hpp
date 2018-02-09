@@ -1,10 +1,13 @@
-/*********************************************************
-*                                                        *
-*                                                        *
-*********************************************************/
+/*********************************************************************
+*                                                                    *
+*  Class that publishes messages of type SkeletonFixedOrder to the   *
+*  kinect_skeleton topic. This is used for the teleoperation of NAO  *
+*  (see the nao_kinect_teleop package)                               *
+*                                                                    *
+*********************************************************************/
 
-#ifndef _SKBODY_ARRAY_H_
-#define _SKBODY_ARRAY_H_
+#ifndef _SKFIXED_H_
+#define _SKFIXED_H_
 
 #include "NiTE.h"
 
@@ -16,25 +19,27 @@
 #define MAX_DEPTH 10000
 
 
-class SkBodyArray
+class SkFixed
 {
 public:
-  SkBodyArray(const char* strName, ros::NodeHandle& nh);
-  virtual ~SkBodyArray();
+
+  SkFixed(const char* strName, ros::NodeHandle& nh);
+  virtual ~SkFixed();
 
   // Initialize the tracker
   virtual openni::Status Init(int argc, char **argv);
   virtual void Display();
 
 protected:
-  virtual void DisplayPostDraw(){};	// Overload to draw over the screen image
+
   void Finalize();
 
 private:
-  SkBodyArray(const SkBodyArray&);
-  SkBodyArray& operator=(SkBodyArray&);
 
-  static SkBodyArray* self_;
+  SkFixed(const SkFixed&);
+  SkFixed& operator=(SkFixed&);
+
+  static SkFixed* self_;
 
   // Drawings
   void DrawSkeleton(const nite::UserData& userData);
@@ -59,19 +64,24 @@ private:
   // ROS node handler
   ros::NodeHandle nh_;
 
-  // Markers
-  std::vector<BallMarker*> markers_;
+  // Ball markers
+  std::vector<BallMarker*> ball_markers_;
   void show_marker(const nite::SkeletonJoint& joint,
                    const unsigned int& marker_id,
                    const std::string& joint_name);
-  // Joint Position
-  Eigen::VectorXd p_;
-  // For skeleton lines
-  LineMarker* lines_;
+  // Line markers (for skeleton lines)
+  LineMarker* line_markers_;
+  // Frame markers
+  std::vector<FrameMarker*> frame_markers_;
+
+  // Temporal storage for joint poses
+  Eigen::VectorXd pose_;
+  // Temporal storage for joint positions
+  Eigen::VectorXd position_;
 
   // Publish to a given topic
   ros::Publisher pub_;
-  kinect_msgs::SkeletonFixedOrder body_array_;
+  kinect_msgs::SkeletonFixedOrder skeleton_msg_;
   unsigned int offset_;
 };
 
